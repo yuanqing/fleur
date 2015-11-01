@@ -1,4 +1,6 @@
 module.exports = {
-  makeActions: require('./lib/make-actions'),
-  makeStore: require('./lib/make-store')
+  assign: require('./lib/assign'),
+  createActions: require('./lib/create-actions'),
+  createStore: require('./lib/create-store'),
+  promise: require('./lib/promise')
 };

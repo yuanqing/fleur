@@ -1,28 +1,37 @@
-var store = require('../lib/make-store')({
-  foo: {
-    bar: 'initial'
-  }
-});
+var Fleur = require('..');
 
-var Foo = require('../lib/make-actions')('foo', {
-  synchronousAction: function() {
+var Foo = Fleur.createActions('shop', {
+  bar: function(val) {
     return {
-      bar: 'baz'
+      x: val
     };
   },
-  asyncAction: function(state, promise) {
-    return promise(function(resolve) {
-      resolve({
-        bar: 'qux'
-      });
+  baz: function(val) {
+    return Fleur.promise(function(resolve) {
+      setTimeout(function() {
+        resolve({
+          x: val
+        });
+      }, 0);
     });
   }
 });
 
-console.log('initial:', store.getState());
-store.dispatch(Foo.synchronousAction).then(function() {
-  console.log('after synchronousAction:', store.getState());
-  store.dispatch(Foo.asyncAction).then(function() {
-    console.log('after synchronousAction:', store.getState());
-  });
+var Qux = Fleur.createActions('products', {
+  quux: function(val) {
+    return {
+      x: val
+    };
+  }
 });
+
+var store = Fleur.createStore();
+
+var dispatch = store.dispatch;
+dispatch(Foo.bar('bar'))
+  .then(function() {
+   return dispatch(Foo.baz('baz'));
+  })
+  .then(function() {
+   console.log(store.getState());
+  });
