@@ -30,8 +30,11 @@ var store = Fleur.createStore();
 var dispatch = store.dispatch;
 dispatch(Foo.bar('bar'))
   .then(function() {
-   return dispatch(Foo.baz('baz'));
+    return dispatch(Foo.baz('baz'));
   })
   .then(function() {
-   console.log(store.getState());
+    return dispatch(Qux.quux('quux'));
+  })
+  .then(function() {
+    console.log(store.getState());
   });
