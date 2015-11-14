@@ -7,13 +7,13 @@ var Foo = Fleur.createActions('shop', {
     };
   },
   baz: function(val) {
-    return Fleur.promise(function(resolve) {
+    return function(resolve) {
       setTimeout(function() {
         resolve({
           x: val
         });
       }, 0);
-    });
+    };
   }
 });
 
@@ -26,14 +26,12 @@ var Qux = Fleur.createActions('products', {
 });
 
 var store = Fleur.createStore();
-
-var dispatch = store.dispatch;
-dispatch(Foo.bar('bar'))
+store.dispatch(Foo.bar('bar'))
   .then(function() {
-    return dispatch(Foo.baz('baz'));
+    store.dispatch(Qux.quux('quux'));
   })
   .then(function() {
-    return dispatch(Qux.quux('quux'));
+    store.dispatch(Foo.baz('baz'));
   })
   .then(function() {
     console.log(store.getState());
