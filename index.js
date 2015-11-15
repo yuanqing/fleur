@@ -1,6 +1,6 @@
 module.exports = {
   assign: require('./lib/assign'),
-  createActions: require('./lib/create-actions'),
-  createStore: require('./lib/create-store'),
-  promise: require('./lib/promise')
+  actions: require('./lib/actions'),
+  store: require('./lib/store'),
+  promise: require('./lib/promise'),
 };
