@@ -1,7 +1,7 @@
 {
   "name": "fleur",
   "version": "0.0.0",
-  "description": "",
+  "description": "Flux without the boilerplate.",
   "author": "Lim Yuan Qing",
   "license": "MIT",
   "scripts": {
