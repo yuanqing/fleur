@@ -1,29 +1,22 @@
 var Fleur = require('..');
 
-var Foo = Fleur.actions('shop', {
-  request: function() {
-    return {
+var Foo = Fleur.actions('foo', {
+  synchronous: function(state) {
+    return Fleur.assign(state, {
       status: 'pending'
-    };
+    });
   },
-  get: function(state) {
-    return function(dispatch) {
-      dispatch(Foo.request());
-      return Fleur.promise(function(resolve) {
-        setTimeout(function() {
-          resolve(Fleur.assign(state, {
-            items: [{ title: 'foo' }, { title: 'bar' }],
-            status: 'success'
-          }));
-        }, 100);
-      });
-    };
-  },
-  promise: function(state) {
+  asynchronous: function(state, trigger) {
+    trigger(Foo.synchronous());
     return Fleur.promise(function(resolve) {
       setTimeout(function() {
         resolve(Fleur.assign(state, {
-          items: null
+          items: [
+            { title: 'foo', id: 1 },
+            { title: 'bar', id: 2 },
+            { title: 'baz', id: 3 }
+          ],
+          status: 'success'
         }));
       }, 100);
     });
@@ -31,13 +24,7 @@ var Foo = Fleur.actions('shop', {
 });
 
 var store = Fleur.store();
-store.dispatch(Foo.get())
-  .then(function() {
-    console.log(store.getState());
-  })
-  .then(function() {
-    return store.dispatch(Foo.promise());
-  })
+store.trigger(Foo.asynchronous())
   .then(function() {
     console.log(store.getState());
   });
