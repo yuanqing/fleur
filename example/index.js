@@ -6,8 +6,8 @@ var Foo = Fleur.actions('foo', {
       status: 'pending'
     });
   },
-  asynchronous: function(state, trigger) {
-    trigger(Foo.synchronous());
+  asynchronous: function(state, dispatch) {
+    dispatch(Foo.synchronous());
     return Fleur.promise(function(resolve) {
       setTimeout(function() {
         resolve(Fleur.assign(state, {
@@ -24,7 +24,7 @@ var Foo = Fleur.actions('foo', {
 });
 
 var store = Fleur.store();
-store.trigger(Foo.asynchronous())
+store.dispatch(Foo.asynchronous())
   .then(function() {
     console.log(store.getState());
   });

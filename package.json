@@ -16,10 +16,11 @@
   },
   "devDependencies": {
     "eslint": "^1.9.0",
+    "istanbul": "^0.4.0",
     "tape": "^4.2.2"
   },
   "scripts": {
-    "lint": "eslint index.js lib/*.js test/*.js example/*.js",
+    "lint": "eslint *.js test/*.js example/*.js",
     "test": "rm -rf coverage && istanbul cover -- tape test/*.js --verbose"
   },
   "keywords": [
