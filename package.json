@@ -4,13 +4,26 @@
   "description": "Flux without the boilerplate.",
   "author": "Lim Yuan Qing",
   "license": "MIT",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/yuanqing/fleur.git"
   },
   "dependencies": {
     "object-assign": "^4.0.1",
     "promiscuous": "^0.6.0",
     "savoy": "^0.3.1",
     "setimmediate.js": "^1.0.1"
-  }
+  },
+  "devDependencies": {
+    "eslint": "^1.9.0",
+    "tape": "^4.2.2"
+  },
+  "scripts": {
+    "lint": "eslint index.js lib/*.js test/*.js example/*.js",
+    "test": "rm -rf coverage && istanbul cover -- tape test/*.js --verbose"
+  },
+  "keywords": [
+    "flux",
+    "react"
+  ]
 }
