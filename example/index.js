@@ -23,8 +23,12 @@ var Foo = Fleur.actions('foo', {
   }
 });
 
+var log = function(object) {
+  console.log(JSON.stringify(object, null, 2));
+};
+
 var store = Fleur.store();
 store.dispatch(Foo.asynchronous())
   .then(function() {
-    console.log(store.getState());
+    log(store.getState());
   });
