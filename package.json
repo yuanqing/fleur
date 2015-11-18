@@ -1,6 +1,6 @@
 {
   "name": "fleur",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Something like Flux, without the boilerplate.",
   "author": "Lim Yuan Qing",
   "license": "MIT",
