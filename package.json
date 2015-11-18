@@ -21,7 +21,7 @@
     "tape": "^4.2.2"
   },
   "scripts": {
-    "lint": "eslint *.js test/*.js example/*.js",
+    "lint": "eslint lib/*.js test/*.js example/*.js",
     "test": "rm -rf coverage && istanbul cover -- tape test/*.js --verbose"
   },
   "keywords": [
