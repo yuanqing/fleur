@@ -1,119 +1,122 @@
 var test = require('tape');
 var Fleur = require('../..');
 
-test('dispatch a synchronous `action`, without a `listener`', function(t) {
-  t.plan(5);
-  var store = Fleur.store();
-  var action = function(state, dispatch) {
-    t.equal(arguments.length, 2);
-    t.equal(dispatch, store.dispatch);
-    t.looseEqual(state, {});
-    return {
-      bar: 'changed'
-    };
-  };
-  action.key = 'foo';
+test('dispatch a synchronous action, with `state[key]` being initially `undefined`', function(t) {
+  t.plan(6);
+  var store = Fleur.store({});
+  var Actions = Fleur.actions('x', {
+    foo: function(state, dispatch) {
+      t.equal(arguments.length, 2);
+      t.equal(state, store.getState().x);
+      t.looseEqual(state, {});
+      t.equal(dispatch, store.dispatch);
+      return {
+        y: 'changed'
+      };
+    }
+  });
   t.looseEqual(store.getState(), {});
-  store.dispatch(action);
+  store.dispatch(Actions.foo());
   t.looseEqual(store.getState(), {
-    foo: {
-      bar: 'changed'
+    x: {
+      y: 'changed'
     }
   });
 });
 
-test('dispatch a synchronous `action`, with middleware', function(t) {
+test('dispatch a synchronous action, with `state[key]` having an initial value', function(t) {
   t.plan(4);
   var store = Fleur.store({
+    initialState: {
+      x: {
+        y: 'initial'
+      }
+    }
+  });
+  var Actions = Fleur.actions('x', {
+    foo: function(state) {
+      t.equal(state, store.getState().x);
+      t.looseEqual(state, {
+        y: 'initial'
+      });
+      return {
+        y: 'changed'
+      };
+    }
+  });
+  t.looseEqual(store.getState(), {
+    x: {
+      y: 'initial'
+    }
+  });
+  store.dispatch(Actions.foo());
+  t.looseEqual(store.getState(), {
+    x: {
+      y: 'changed'
+    }
+  });
+});
+
+test('dispatch a synchronous action, with `middleware` and `listener`', function(t) {
+  t.plan(7);
+  var flag = false;
+  var store = Fleur.store({
+    initialState: {
+      x: {
+        y: 'initial'
+      }
+    },
     middleware: [
       function(state, dispatch) {
         return function(action) {
-          t.looseEqual(state, {});
+          t.looseEqual(state, {
+            x: {
+              y: 'initial'
+            }
+          });
+          flag = true;
+          return dispatch(action);
+        };
+      },
+      function(state, dispatch) {
+        return function(action) {
+          t.looseEqual(state, {
+            x: {
+              y: 'initial'
+            }
+          });
+          t.true(flag);
           return dispatch(action);
         };
       }
-    ]
-  });
-  var action = function(state) {
-    t.looseEqual(state, {});
-    return {
-      bar: 'changed'
-    };
-  };
-  action.key = 'foo';
-  t.looseEqual(store.getState(), {});
-  store.dispatch(action);
-  t.looseEqual(store.getState(), {
-    foo: {
-      bar: 'changed'
-    }
-  });
-});
-
-test('dispatch a synchronous `action`, with `state[key]` being initially `undefined`', function(t) {
-  t.plan(6);
-  var store = Fleur.store({
+    ],
     listener: function(state) {
-      t.equal(arguments.length, 1);
-      t.equal(state, store.getState());
       t.looseEqual(state, {
-        foo: {
-          bar: 'changed'
+        x: {
+          y: 'changed'
         }
       });
     }
   });
-  var action = function(state) {
-    t.looseEqual(state, {});
-    return {
-      bar: 'changed'
-    };
-  };
-  action.key = 'foo';
-  t.looseEqual(store.getState(), {});
-  store.dispatch(action);
-  t.looseEqual(store.getState(), {
-    foo: {
-      bar: 'changed'
-    }
-  });
-});
-
-test('dispatch a synchronous `action`, with `state[key]` having an initial value', function(t) {
-  t.plan(4);
-  var initialState = {
-    foo: {
-      bar: 'initial'
-    }
-  };
-  var store = Fleur.store({
-    initialState: initialState,
-    listener: function(state) {
+  var Actions = Fleur.actions('x', {
+    foo: function(state) {
       t.looseEqual(state, {
-        foo: {
-          bar: 'changed'
-        }
+        y: 'initial'
       });
+      return {
+        y: 'changed'
+      };
     }
   });
-  var action = function(state) {
-    t.looseEqual(state, {
-      bar: 'initial'
-    });
-    return {
-      bar: 'changed'
-    };
-  };
-  action.key = 'foo';
   t.looseEqual(store.getState(), {
-    foo: {
-      bar: 'initial'
+    x: {
+      y: 'initial'
     }
   });
-  store.dispatch(action);
+  store.dispatch(Actions.foo());
   t.looseEqual(store.getState(), {
-    foo: {
-      bar: 'changed'
+    x: {
+      y: 'changed'
     }
   });
 });

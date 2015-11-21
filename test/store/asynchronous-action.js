@@ -2,126 +2,61 @@ var test = require('tape');
 var Fleur = require('../..');
 var cloneDeep = require('lodash.clonedeep');
 
-test('dispatch an asynchronous `action`, invoking `resolve` with the new `state`', function(t) {
+test('dispatch an asynchronous action, invoking `resolve` with the new `state`', function(t) {
   t.plan(4);
-  var initialState = {
-    foo: {
-      bar: 'initial'
-    }
-  };
   var store = Fleur.store({
-    initialState: initialState,
+    initialState: {
+      x: {
+        y: 'initial'
+      }
+    },
     listener: function(state) {
       t.looseEqual(state, {
-        foo: {
-          bar: 'changed'
+        x: {
+          y: 'changed'
         }
       });
     }
   });
-  var action = function(state) {
-    t.looseEqual(state, {
-      bar: 'initial'
-    });
-    return Fleur.promise(function(resolve) {
-      setTimeout(function() {
-        resolve({
-          bar: 'changed'
-        });
-      }, 0);
-    });
-  };
-  action.key = 'foo';
-  t.looseEqual(store.getState(), {
-    foo: {
-      bar: 'initial'
+  var Actions = Fleur.actions('x', {
+    x: function(state) {
+      t.looseEqual(state, {
+        y: 'initial'
+      });
+      return Fleur.promise(function(resolve) {
+        setTimeout(function() {
+          resolve({
+            y: 'changed'
+          });
+        }, 0);
+      });
     }
   });
-  store.dispatch(action).then(function() {
+  t.looseEqual(store.getState(), {
+    x: {
+      y: 'initial'
+    }
+  });
+  store.dispatch(Actions.x()).then(function() {
     t.looseEqual(store.getState(), {
-      foo: {
-        bar: 'changed'
+      x: {
+        y: 'changed'
       }
     });
   });
 });
 
-test('dispatch an asynchronous `action` that itself dispatches a synchronous action', function(t) {
-  t.plan(6);
-  var initialState = {
-    foo: {
-      bar: 'initial'
-    }
-  };
-  var states = [];
-  var store = Fleur.store({
-    initialState: initialState,
-    listener: function(state) {
-      states.push(cloneDeep(state));
-    }
-  });
-  var pendingAction = function(state) {
-    t.looseEqual(state, {
-      bar: 'initial'
-    });
-    return {
-      bar: 'pending'
-    };
-  };
-  pendingAction.key = 'foo';
-  var successAction = function(state) {
-    t.looseEqual(state, {
-      bar: 'pending'
-    });
-    return {
-      bar: 'success'
-    };
-  };
-  successAction.key = 'foo';
-  var asynchronousAction = function(state, dispatch) {
-    t.looseEqual(state, {
-      bar: 'initial'
-    });
-    dispatch(pendingAction);
-    return Fleur.promise(function(resolve) {
-      setTimeout(function() {
-        dispatch(successAction).then(resolve);
-      }, 0);
-    });
-  };
-  asynchronousAction.key = 'foo';
-  t.looseEqual(store.getState(), {
-    foo: {
-      bar: 'initial'
-    }
-  });
-  store.dispatch(asynchronousAction).then(function() {
-    t.looseEqual(store.getState(), {
-      foo: {
-        bar: 'success'
-      }
-    });
-    t.looseEqual(states, [
-      { foo: { bar: 'pending' } },
-      { foo: { bar: 'success' } }
-    ]);
-  });
-});
-
-test('dispatch an asynchronous `action` that itself dispatches a synchronous action', function(t) {
+test('dispatch an asynchronous action that itself dispatches synchronous actions, with `middleware` and `listener`', function(t) {
   t.plan(7);
   var initialState = {
-    foo: {
-      bar: 'initial'
+    x: {
+      y: 'initial'
     }
   };
-  var listenerStates = [];
   var middlewareStates = [];
+  var listenerStates = [];
   var store = Fleur.store({
     initialState: initialState,
-    listener: function(state) {
-      listenerStates.push(cloneDeep(state));
-    },
     middleware: [
       function(state, dispatch) {
         return function(action) {
@@ -132,69 +67,68 @@ test('dispatch an asynchronous `action` that itself dispatches a synchronous act
           return dispatch(action);
         };
       }
-    ]
-  });
-  var pendingAction = function(state) {
-    t.looseEqual(state, {
-      bar: 'initial'
-    });
-    return {
-      bar: 'pending'
-    };
-  };
-  pendingAction.key = 'foo';
-  pendingAction.actionName = 'pendingAction';
-  var successAction = function(state) {
-    t.looseEqual(state, {
-      bar: 'pending'
-    });
-    return {
-      bar: 'success'
-    };
-  };
-  successAction.key = 'foo';
-  successAction.actionName = 'successAction';
-  var asynchronousAction = function(state, dispatch) {
-    t.looseEqual(state, {
-      bar: 'initial'
-    });
-    dispatch(pendingAction);
-    return Fleur.promise(function(resolve) {
-      setTimeout(function() {
-        dispatch(successAction).then(resolve);
-      }, 0);
-    });
-  };
-  asynchronousAction.key = 'foo';
-  asynchronousAction.actionName = 'asynchronousAction';
-  t.looseEqual(store.getState(), {
-    foo: {
-      bar: 'initial'
+    ],
+    listener: function(state) {
+      listenerStates.push(cloneDeep(state));
     }
   });
-  store.dispatch(asynchronousAction).then(function() {
+  var Actions = Fleur.actions('x', {
+    request: function(state, dispatch) {
+      t.looseEqual(state, {
+        y: 'initial'
+      });
+      dispatch(Actions.pending());
+      return Fleur.promise(function(resolve) {
+        setTimeout(function() {
+          dispatch(Actions.success()).then(resolve);
+        }, 0);
+      });
+    },
+    pending: function(state) {
+      t.looseEqual(state, {
+        y: 'initial'
+      });
+      return {
+        y: 'pending'
+      };
+    },
+    success: function(state) {
+      t.looseEqual(state, {
+        y: 'pending'
+      });
+      return {
+        y: 'success'
+      };
+    }
+  });
+  t.looseEqual(store.getState(), {
+    x: {
+      y: 'initial'
+    }
+  });
+  store.dispatch(Actions.request()).then(function() {
     t.looseEqual(store.getState(), {
-      foo: {
-        bar: 'success'
+      x: {
+        y: 'success'
       }
     });
-    t.looseEqual(listenerStates, [
-      { foo: { bar: 'pending' } },
-      { foo: { bar: 'success' } }
-    ]);
     t.looseEqual(middlewareStates, [
       {
-        actionName: 'asynchronousAction',
-        state: { foo: { bar: 'initial' } },
+        actionName: 'request',
+        state: { x: { y: 'initial' } },
       },
       {
-        actionName: 'pendingAction',
-        state: { foo: { bar: 'initial' } },
+        actionName: 'pending',
+        state: { x: { y: 'initial' } },
       },
       {
-        actionName: 'successAction',
-        state: { foo: { bar: 'pending' } }
+        actionName: 'success',
+        state: { x: { y: 'pending' } }
       }
+    ]);
+    t.looseEqual(listenerStates, [
+      { x: { y: 'pending' } },
+      { x: { y: 'success' } }
     ]);
   });
 });
