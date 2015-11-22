@@ -10,10 +10,13 @@
   },
   "main": "lib/index.js",
   "dependencies": {
+    "main-loop": "^3.2.0",
     "object-assign": "^4.0.1",
     "promiscuous": "^0.6.0",
+    "rlite-router": "^1.1.1",
     "savoy": "^0.3.1",
-    "setimmediate.js": "^1.0.1"
+    "setimmediate.js": "^1.0.1",
+    "virtual-dom": "^2.1.1"
   },
   "devDependencies": {
     "eslint": "^1.10.1",
