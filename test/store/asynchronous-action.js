@@ -19,7 +19,7 @@ test('dispatch an asynchronous action, invoking `resolve` with the new `state`',
     }
   });
   var Actions = Fleur.actions('x', {
-    x: function(state) {
+    foo: function(state) {
       t.looseEqual(state, {
         y: 'initial'
       });
@@ -37,7 +37,7 @@ test('dispatch an asynchronous action, invoking `resolve` with the new `state`',
       y: 'initial'
     }
   });
-  store.dispatch(Actions.x()).then(function() {
+  store.dispatch(Actions.foo()).then(function() {
     t.looseEqual(store.getState(), {
       x: {
         y: 'changed'
@@ -57,17 +57,15 @@ test('dispatch an asynchronous action that itself dispatches synchronous actions
   var listenerStates = [];
   var store = Fleur.store({
     initialState: initialState,
-    middleware: [
-      function(state, dispatch) {
-        return function(action) {
-          middlewareStates.push({
-            state: cloneDeep(state),
-            actionName: action.actionName
-          });
-          return dispatch(action);
-        };
-      }
-    ],
+    middleware: function(state, dispatch) {
+      return function(action) {
+        middlewareStates.push({
+          state: cloneDeep(state),
+          actionName: action.actionName
+        });
+        return dispatch(action);
+      };
+    },
     listener: function(state) {
       listenerStates.push(cloneDeep(state));
     }
@@ -107,19 +105,14 @@ test('dispatch an asynchronous action that itself dispatches synchronous actions
     }
   });
   store.dispatch(Actions.request()).then(function() {
-    t.looseEqual(store.getState(), {
-      x: {
-        y: 'success'
-      }
-    });
     t.looseEqual(middlewareStates, [
       {
         actionName: 'request',
-        state: { x: { y: 'initial' } },
+        state: { x: { y: 'initial' } }
       },
       {
         actionName: 'pending',
-        state: { x: { y: 'initial' } },
+        state: { x: { y: 'initial' } }
       },
       {
         actionName: 'success',
@@ -130,5 +123,10 @@ test('dispatch an asynchronous action that itself dispatches synchronous actions
       { x: { y: 'pending' } },
       { x: { y: 'success' } }
     ]);
+    t.looseEqual(store.getState(), {
+      x: {
+        y: 'success'
+      }
+    });
   });
 });

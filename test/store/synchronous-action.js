@@ -58,8 +58,8 @@ test('dispatch a synchronous action, with `state[key]` having an initial value',
 });
 
 test('dispatch a synchronous action, with `middleware` and `listener`', function(t) {
-  t.plan(7);
-  var flag = false;
+  t.plan(10);
+  var flag = 0;
   var store = Fleur.store({
     initialState: {
       x: {
@@ -74,7 +74,8 @@ test('dispatch a synchronous action, with `middleware` and `listener`', function
               y: 'initial'
             }
           });
-          flag = true;
+          t.equal(flag, 0);
+          flag = 1;
           return dispatch(action);
         };
       },
@@ -85,7 +86,19 @@ test('dispatch a synchronous action, with `middleware` and `listener`', function
               y: 'initial'
             }
           });
-          t.true(flag);
+          t.equal(flag, 1);
+          flag = 2;
+          return dispatch(action);
+        };
+      },
+      function(state, dispatch) {
+        return function(action) {
+          t.looseEqual(state, {
+            x: {
+              y: 'initial'
+            }
+          });
+          t.equal(flag, 2);
           return dispatch(action);
         };
       }
